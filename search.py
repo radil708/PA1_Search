@@ -297,13 +297,16 @@ def getUCSPath(dict_paths: dict, last_node_state, first_node_state):
     return path
 
 
-
-def uniformCostSearch(problem: SearchProblem):
+#TODO remove optional arg
+def uniformCostSearch(problem: SearchProblem, display = False):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    input("hit enter to continue")
     #cost of the node will determing priority
 
     #prioQ only cares about priority and state
+
+    display = True
 
     #but we need to track parents too....
     child_to_parent_dict = {}
@@ -321,40 +324,70 @@ def uniformCostSearch(problem: SearchProblem):
 
     # cost to self is 0
     frontier.push(problem.getStartState(),0)
+    parent_cost = 0
 
     while not frontier.isEmpty():
+        if display == True:
+            print("----------------------------------------------"
+                  "\nCurrent Frontier: " + frontier.heap.__str__() +
+                  "\n--------------------------------------------")
+        # pop only returns that state!
         current_node = frontier.pop()
+        if display == True:
+            print("Current Node: ", current_node)
+            print("current node state: " , current_node)
         # add popped state to explored
-        explored.append(current_node[0])
+        explored.append(current_node)
 
         # is current state the goal state?
-        if problem.isGoalState(current_node[0]):
+        if problem.isGoalState(current_node):
             break
 
-        try:
-            # look at child nodes that contain states from current state
-            for successor_node in problem.getSuccessors(current_node[0]):
-                # if state is not in explored
-                if successor_node[0] not in explored:
-                    heap_list = list(frontier.heap)
+        if display == True:
+            print("Getting successors to node: ", current_node)
+        counter = 1
+        #for each in problem.getSuccessors(current_node):
+            #print(each)
+        # look at child nodes that contain states from current state
+        counter = 0
+        for successor_node in problem.getSuccessors(current_node):
+            counter += 1
+            if display == True:
+                print(f"successor # {counter}.) ", successor_node  )
+            # if the node has already been explored do NOT add to frontier
+            if successor_node[0] in explored:
+                #if display == True:
+                    #print("ALREADY EXPLORED STATE: ", successor_node[0])
+                continue
+            else:
+                print(f"parent of {successor_node[0]} is {current_node}")
+                print(f"cost to reach parent is {child_to_parent_dict[current_node][2]}")
+                cum_cost = child_to_parent_dict[current_node][2] + successor_node[2]
+                print(f"CUM COST for {successor_node[0]} is parent cost + child cost")
+                print(f"{child_to_parent_dict[current_node][2] } + {successor_node[2]} = {cum_cost}")
+                heap_list = frontier.heap
+                # if the state is not in explored but is in the heap
+                if isAlreadyInHeap(heap_list, successor_node[0]):
+                    # if the current state priority is better than the state's priority in the heap
+                    if hasBetterPrio(heap_list, successor_node[0], cum_cost):
+                        if display == True:
+                            print("UPDATING ", successor_node[0])
+                        frontier.update(successor_node[0], successor_node[2])
+                        child_to_parent_dict[successor_node[0]] = current_node, successor_node[1], cum_cost
+                else:
+                    # if the state is not in the heap
+                    if display == True:
+                        print(successor_node)
+                        print("state: ", successor_node[0], " not in heaplist: " + heap_list.__str__())
+                        print("pushing ", successor_node[0], " with priority: " + str(cum_cost))
+                    frontier.push(successor_node[0], cum_cost)
+                    cum_cost = successor_node[2] + parent_cost
+                    child_to_parent_dict[successor_node[0]] = current_node, successor_node[1], cum_cost
+                print("\n current dict", child_to_parent_dict)
 
-                    # if the state is not in explored but is in the heap
-                    if isAlreadyInHeap(heap_list, successor_node[0]):
-                        print("state: " + successor_node[0] + " ALREADY in heaplist: " + heap_list.__str__())
-                        if hasBetterPrio(heap_list, successor_node[0], successor_node[2]):
-                            # if the current state priority is better than the state's priority in the heap
-                            print("UPDATING " + successor_node[0])
-                            frontier.update(successor_node[0], successor_node[2])
-                    else:
-                        # if the state is not in the heap
-                        print("state: " + successor_node[0] + " not in heaplist: " + heap_list.__str__())
-                        print("pushing " + successor_node[0])
-                        frontier.push(successor_node[0], successor_node[2])
-                    child_to_parent_dict[successor_node[0]] = current_node[0], successor_node[1], successor_node[2]
-        except KeyError:
-            continue
-    print("UCS Complete")
-    return getUCSPath(child_to_parent_dict,current_node[0], first_state)
+    print("UCS Complete======================================================================================\n\n")
+    #print(child_to_parent_dict)
+    return getUCSPath(child_to_parent_dict,current_node, first_state)
 
 
 
