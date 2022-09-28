@@ -77,7 +77,7 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 
-#TODO Move code into function cannot have custom function methods created
+#custom helper function, do NOT delete
 def getActionsFromNodes(last_node : dict) -> list:
 
     store_actions = []
@@ -154,157 +154,56 @@ def depthFirstSearch(problem: SearchProblem):
     # Initialize the explored set
     explored = set()
 
-    #flag tells us if solution was found
-    solution_found_flag = False
 
-    #store all child->parent paths
-    stored_parent_paths = {}
-    stored_actions = {}
+    # if problem.GOAL-TEST(node.STATE) then return SOLUTION(node)
+    if problem.isGoalState(start_node["STATE"]):
+        # TODO delete print statements
+        #print("DFS REACHED GOAL STATE")
+        # no more directions to return if we achieved goal state
+        return []
 
+    # loop do
+    while True:
+        ##if frontier is empty then return Fail
+        if frontier.isEmpty():
+            raise RuntimeError("No more nodes to explore")
 
-    #loop do while frontier is not empty
-    while not frontier.isEmpty():
-        # curr_node = last node in the frontier, remove curr_node from the frontier
+    # curr_node = last node in the frontier, remove curr_node from the frontier
         current_node = frontier.pop()
-        current_state = current_node["STATE"]
-        if problem.isGoalState(current_node["STATE"]):
-            solution_found_flag = True
-            break
 
+        #Add curr_node.state to explored
+        # set cannot contain dicts as elements
+        explored.add(current_node["STATE"])
+
+        if problem.isGoalState(current_node["STATE"]):
+            # TODO delete print statements
+            # print("GOAL STATE REACHED")
+            return getActionsFromNodes(current_node)
+    #
+    # 	for each action in problem.ACTIONS(node.STATE) do
+        # so get all potential actions i.e. the next nodes
         all_successors = problem.getSuccessors(current_node["STATE"])
 
         for successor_node in all_successors:
             # child = CHILD-NODE(problem, node, action), also keep track of parent to return a set of directions
-            child = {"STATE": successor_node[0], "ACTION": successor_node[1], "COST": successor_node[2]}
-            stored_parent_paths[child["STATE"]] = current_node["STATE"]
-            stored_actions[(child["STATE"], current_node["STATE"])] = child["ACTION"]
-            #print("Parent: " + current_node["STATE"] + "\t" + "Child: " + child["STATE"])
-            #print(stored_parent_paths)
+            child = {"STATE": successor_node[0], "ACTION": successor_node[1], "COST": successor_node[2],
+                     "PARENT": current_node}
+            #print(child["COST"])
 
-
-            # if child.STATE is not in explored or frontier then put child in frontier
+            #if child.STATE is not in explored or frontier then
+            # testing they want us to keep track of node only in explored not frontier
             if child not in frontier.list and child["STATE"] not in explored:
+            #if child["STATE"] not in explored:
+                # TODO delete print statements
+                #print("NODE ADDED")
+            #if problem.GOAL-TEST(child.STATE) then return Solution(child)
                 frontier.push(child)
-
-    # if solution not found raise error
-    if solution_found_flag == False:
-        raise RuntimeError("Unable to find solution path")
-
-    # use last node to get solution path because every node also keeps track of their parent
-    reversed_parent_paths = []
-
-    print("Current State:" + current_state)
-    print("Start state: " + start_node["STATE"] +"\n")
-
-    counter = 0
-    print(counter)
-    while current_state != start_node["STATE"]:
-        counter += 1
-        if counter > 10:
-            break
-        print(counter)
-        parent_state = stored_parent_paths[current_state]
-        print(parent_state + " <-- " + current_state)
-        direction = stored_actions[(current_state, parent_state)]
-        reversed_parent_paths.append(direction)
-        current_state = parent_state
-        #print("new current should be previous parent:" + current_state)
-        #exit(0)
-
-    if counter > 10:
-        exit(0)
-    reversed_parent_paths.reverse()
-
-    return reversed_parent_paths
-
-
-    # # use last node to get solution path because every node also keeps track of their parent
-    # reversed_parent_paths = []
-    #
-    # last_item = stored_parent_paths[-1]
-    # parent_state = last_item[1]
-    # reversed_parent_paths.append(last_item[2])
-    #
-    # while parent_state is not None:
-    #     for each in stored_parent_paths:
-    #         # if the element's current state is the same as the parent state from the previous node
-    #         if each[0] == parent_state:
-    #             # add the action to the path
-    #             reversed_parent_paths.append(each[2])
-    #             # parent state of current state is new parent state to look for
-    #             parent_state = each[1]
-    #
-    # reversed_parent_paths.reverse()
-    #
-    # return reversed_parent_paths
+                # keep track of path here
+                #print(child,current_node)
 
 
 
-
-
-    #
-    # while current_node["PARENT"] is not None or current_node["ACTION"] is not None:
-    #     stored_parent_paths.append(current_node["ACTION"])
-    #     current_node = current_node["PARENT"]
-    #
-    # #actions were appended in reverse order i.e. (Child -> Parent) so reverse list to get correct order
-    # stored_parent_paths.reverse()
-    #
-    # return stored_parent_paths
-
-
-
-
-
-    # # if problem.GOAL-TEST(node.STATE) then return SOLUTION(node)
-    # if problem.isGoalState(start_node["STATE"]):
-    #     # TODO delete print statements
-    #     #print("DFS REACHED GOAL STATE")
-    #     # no more directions to return if we achieved goal state
-    #     return []
-    #
-    # # loop do
-    # while True:
-    #     ##if frontier is empty then return Fail
-    #     if frontier.isEmpty():
-    #         raise RuntimeError("No more nodes to explore")
-    #
-    # # curr_node = last node in the frontier, remove curr_node from the frontier
-    #     current_node = frontier.pop()
-    #
-    #     #Add curr_node.state to explored
-    #     # set cannot contain dicts as elements
-    #     explored.add(current_node["STATE"])
-    #
-    #     if problem.isGoalState(current_node["STATE"]):
-    #         # TODO delete print statements
-    #         # print("GOAL STATE REACHED")
-    #         return getActionsFromNodes(current_node)
-    # #
-    # # 	for each action in problem.ACTIONS(node.STATE) do
-    #     # so get all potential actions i.e. the next nodes
-    #     all_successors = problem.getSuccessors(current_node["STATE"])
-    #
-    #     for successor_node in all_successors:
-    #         # child = CHILD-NODE(problem, node, action), also keep track of parent to return a set of directions
-    #         child = {"STATE": successor_node[0], "ACTION": successor_node[1], "COST": successor_node[2],
-    #                  "PARENT": current_node}
-    #         #print(child["COST"])
-    #
-    #         #if child.STATE is not in explored or frontier then
-    #         # testing they want us to keep track of node only in explored not frontier
-    #         if child not in frontier.list and child["STATE"] not in explored:
-    #         #if child["STATE"] not in explored:
-    #             # TODO delete print statements
-    #             #print("NODE ADDED")
-    #         #if problem.GOAL-TEST(child.STATE) then return Solution(child)
-    #             frontier.push(child)
-    #             # keep track of path here
-    #             #print(child,current_node)
-    #
-    #
-    #
-    # #util.raiseNotDefined()
+    #util.raiseNotDefined()
 
 #TODO Move code into function cannot have custom function methods created
 def check_queue(queue: list, key: str, expected_val):
