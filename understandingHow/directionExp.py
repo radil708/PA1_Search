@@ -16,11 +16,24 @@
 # RIGHT = dict([(y,x) for x, y in LEFT.items()])
 #
 # print(RIGHT)
+import heapq
 
-initialValue=False
-height = 10
-width = 5
-x = [[initialValue for y in range(height)] for x in range(width)]
-#print(x)
-for each in x:
-    print(each)
+heap = []
+count = 0
+priority_0 = 0
+priority_1 = 1
+priority_2 = 2
+
+entry = (priority_2, count, "A")
+heapq.heappush(heap, entry)
+count+=1
+
+entry = (priority_1, count, "B")
+heapq.heappush(heap, entry)
+count+=1
+
+entry = (priority_0, count, "V")
+heapq.heappush(heap, entry)
+count+=1
+
+print(heap)

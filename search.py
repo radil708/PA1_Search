@@ -205,7 +205,7 @@ def depthFirstSearch(problem: SearchProblem):
 
     #util.raiseNotDefined()
 
-#TODO Move code into function cannot have custom function methods created
+#custom function do NOT delete
 def check_queue(queue: list, key: str, expected_val):
     flag = False
     for each in queue:
@@ -214,7 +214,7 @@ def check_queue(queue: list, key: str, expected_val):
             break
     return flag
 
-#TODO Move code into function cannot have custom function methods created
+#custom function do NOT delete
 def display_curr_frontier_list(list_in : list, key: str):
     new = []
     for each_dict in list_in:
@@ -257,6 +257,45 @@ def breadthFirstSearch(problem: SearchProblem):
     return getActionsFromNodes(current_node)
 
 
+def check_heapq(prioQHeap : list, target_node, priority):
+    in_heap = False
+    better_prio = False
+    print("in checkheap")
+    print(prioQHeap)
+    for each in prioQHeap:
+        if each[2] == target_node:
+            in_heap = True
+            if priority <= each[0]:
+                better_prio = True
+    return in_heap == True and better_prio == True
+
+def isAlreadyInHeap(heapIn: list, target):
+    in_heap = False
+    for each in heapIn:
+        if each[2] == target:
+            in_heap = True
+            break
+    return in_heap
+
+def hasBetterPrio(heapIn: list, target, priority):
+    better_prio = False
+    for each in heapIn:
+        if each[2] == target and priority <= each[0]:
+            better_prio = True
+            break
+    return better_prio
+
+
+def getUCSPath(dict_paths: dict, last_node_state, first_node_state):
+    path = []
+
+    while last_node_state != first_node_state:
+        path.append(dict_paths[last_node_state][1])
+        last_node_state = dict_paths[last_node_state][0]
+
+    path.reverse()
+    return path
+
 
 
 def uniformCostSearch(problem: SearchProblem):
@@ -264,14 +303,59 @@ def uniformCostSearch(problem: SearchProblem):
     "*** YOUR CODE HERE ***"
     #cost of the node will determing priority
 
-    #initialize start node with state, parent, action, and cost
-    start_node = {"STATE": problem.getStartState(), "PARENT": None,
-                  "ACTION": None, "COST": 0}
+    #prioQ only cares about priority and state
+
+    #but we need to track parents too....
+    child_to_parent_dict = {}
+    # key is child node and parent is value
+    child_to_parent_dict[problem.getStartState()] = (None, None, 0)
+    first_state = problem.getStartState()
+    #initialize start node with state, cost
+
+
     #initialize prio queue
     frontier = util.PriorityQueue()
 
     #initizalize explored
     explored = []
+
+    # cost to self is 0
+    frontier.push(problem.getStartState(),0)
+
+    while not frontier.isEmpty():
+        current_node = frontier.pop()
+        # add popped state to explored
+        explored.append(current_node[0])
+
+        # is current state the goal state?
+        if problem.isGoalState(current_node[0]):
+            break
+
+        try:
+            # look at child nodes that contain states from current state
+            for successor_node in problem.getSuccessors(current_node[0]):
+                # if state is not in explored
+                if successor_node[0] not in explored:
+                    heap_list = list(frontier.heap)
+
+                    # if the state is not in explored but is in the heap
+                    if isAlreadyInHeap(heap_list, successor_node[0]):
+                        print("state: " + successor_node[0] + " ALREADY in heaplist: " + heap_list.__str__())
+                        if hasBetterPrio(heap_list, successor_node[0], successor_node[2]):
+                            # if the current state priority is better than the state's priority in the heap
+                            print("UPDATING " + successor_node[0])
+                            frontier.update(successor_node[0], successor_node[2])
+                    else:
+                        # if the state is not in the heap
+                        print("state: " + successor_node[0] + " not in heaplist: " + heap_list.__str__())
+                        print("pushing " + successor_node[0])
+                        frontier.push(successor_node[0], successor_node[2])
+                    child_to_parent_dict[successor_node[0]] = current_node[0], successor_node[1], successor_node[2]
+        except KeyError:
+            continue
+    print("UCS Complete")
+    return getUCSPath(child_to_parent_dict,current_node[0], first_state)
+
 
 
 
