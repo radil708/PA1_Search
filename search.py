@@ -464,7 +464,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     # input("hit enter to continue")
 
     # set display to True to see debug statements, helpful for seeing step by step
-    display = True
+    display = False
 
     # Keep track of parent child links
     child_to_parent_dict = {}
