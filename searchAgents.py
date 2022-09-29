@@ -347,7 +347,7 @@ class CornersProblem(search.SearchProblem):
 
         #TODO set display to False
         #set to True to show debug statements
-        display = True
+        display = False
 
         # Actual Current Position State
         position = state[0]
@@ -356,8 +356,8 @@ class CornersProblem(search.SearchProblem):
         corners_visited = state[1]
 
         #TODO delete priont statement
+        reached_goal = corners_tuple_equals(self.corners, corners_visited, len(self.corners))
         if display:
-            reached_goal = corners_tuple_equals(self.corners, corners_visited,len(self.corners))
             print(f"is Goal State? : {reached_goal}")
 
         return reached_goal
@@ -387,15 +387,17 @@ class CornersProblem(search.SearchProblem):
 
         "*** YOUR CODE HERE ***"
 
-        #TODO set display to false
-        display = True
+        # Set to true if you want to see debug statements
+        display = False
 
         #using compound state i.e. state = (x,y) , [cornersVisitedList]
 
         successors = []
+
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             x, y = state[0]
             dx, dy = Actions.directionToVector(action)
+
             nextx, nexty = int(x + dx), int(y + dy)
             # from pacman.Gamestate docs
             '''
@@ -407,45 +409,22 @@ class CornersProblem(search.SearchProblem):
             '''
             hitsWall = self.walls[nextx][nexty]
 
-            # if next position is NOT a wall
             if not hitsWall:
-
-                next_position = (nextx,nexty)
+                next_position = (nextx, nexty)
                 corners_visited = list(state[1])
+                cost = 1
 
-                #check if position is in the corner goals
-                if next_position in self.corners:
-                    #check that the next position has not yet been visited
-                    if next_position not in corners_visited:
-                        #add to visited list if so
-                        corners_visited.append(next_position)
-                    cost = 1
-                    successors.append((next_position,corners_visited), action, cost)
+                if next_position in self.corners and next_position not in corners_visited:
+                    corners_visited.append(next_position)
+                    if display:
+                        print(f"Next Position: {next_position} is a corner")
 
+                # TODO ASK: method fails if corners visited is a list, WHY??
+                successors.append(((next_position, tuple(corners_visited)), action, cost))
 
-                # ###################################
-                # position_child_state = (nextx, nexty)
-                #
-                # corners_visited = list(state[1])
-                #
-                #
-                # #TODO logic maybe? wrong here delete and move to heuristic
-                # if position_child_state in self.corners and position_child_state not in corners_visited:
-                #     # update corners visited
-                #     corners_visited.append(position_child_state)
-                #     if display:
-                #         print(f"Child state {position_child_state} is a corner and not in corners visited {corners_visited}")
-                #         print("updating corners visited")
-                #         print("------------------------------")
-                #
-                # # I call this compound state because like a compound it holds more than 1 thing
-                # compound_state = (position_child_state, corners_visited)
-                # #cost must be 1 always for this?
-                # cost = 1
-                # # successor node is a list that looks like
-                # # ( ( (4, 6) , [] ), 'North', 1)
-                # successors.append((compound_state,tuple(action), cost))
-
+            else:
+                if display:
+                    print("next_position HITS wall, going to next successor")
 
         self._expanded += 1 # DO NOT CHANGE
 
