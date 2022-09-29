@@ -272,6 +272,7 @@ def check_heapq(prioQHeap : list, target_node, priority):
 def isAlreadyInHeap(heapIn: list, target):
     in_heap = False
     for each in heapIn:
+        # third element in the sublist of heapin is the state
         if each[2] == target:
             in_heap = True
             break
@@ -302,92 +303,119 @@ def uniformCostSearch(problem: SearchProblem, display = False):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     input("hit enter to continue")
+
     #cost of the node will determing priority
 
     #prioQ only cares about priority and state
 
-    display = True
+    display = False
 
     #but we need to track parents too....
     child_to_parent_dict = {}
-    # key is child node and parent is value
-    child_to_parent_dict[problem.getStartState()] = (None, None, 0)
+    # key is child node and value is (parent, action)
+    child_to_parent_dict[problem.getStartState()] = (None, None)
     first_state = problem.getStartState()
     #initialize start node with state, cost
+
+    shortest_cost_to_state = {problem.getStartState(): 0}
 
 
     #initialize prio queue
     frontier = util.PriorityQueue()
 
+    frontier.push(first_state,0)
+
+
     #initizalize explored
     explored = []
 
-    # cost to self is 0
-    frontier.push(problem.getStartState(),0)
-    parent_cost = 0
-
     while not frontier.isEmpty():
-        if display == True:
-            print("----------------------------------------------"
-                  "\nCurrent Frontier: " + frontier.heap.__str__() +
-                  "\n--------------------------------------------")
-        # pop only returns that state!
-        current_node = frontier.pop()
-        if display == True:
-            print("Current Node: ", current_node)
-            print("current node state: " , current_node)
-        # add popped state to explored
-        explored.append(current_node)
+        #current node is parent node
+        #this only returns the item or "state" not anything else
+        current_state = frontier.pop()
 
-        # is current state the goal state?
-        if problem.isGoalState(current_node):
+        #reached goal!
+        if problem.isGoalState(current_state):
+            if display:
+                print("Goal state has been reached")
             break
 
-        if display == True:
-            print("Getting successors to node: ", current_node)
-        counter = 1
-        #for each in problem.getSuccessors(current_node):
-            #print(each)
-        # look at child nodes that contain states from current state
-        counter = 0
-        for successor_node in problem.getSuccessors(current_node):
-            counter += 1
-            if display == True:
-                print(f"successor # {counter}.) ", successor_node  )
-            # if the node has already been explored do NOT add to frontier
-            if successor_node[0] in explored:
-                #if display == True:
-                    #print("ALREADY EXPLORED STATE: ", successor_node[0])
-                continue
-            else:
-                print(f"parent of {successor_node[0]} is {current_node}")
-                print(f"cost to reach parent is {child_to_parent_dict[current_node][2]}")
-                cum_cost = child_to_parent_dict[current_node][2] + successor_node[2]
-                print(f"CUM COST for {successor_node[0]} is parent cost + child cost")
-                print(f"{child_to_parent_dict[current_node][2] } + {successor_node[2]} = {cum_cost}")
-                heap_list = frontier.heap
-                # if the state is not in explored but is in the heap
-                if isAlreadyInHeap(heap_list, successor_node[0]):
-                    # if the current state priority is better than the state's priority in the heap
-                    if hasBetterPrio(heap_list, successor_node[0], cum_cost):
-                        if display == True:
-                            print("UPDATING ", successor_node[0])
-                        frontier.update(successor_node[0], successor_node[2])
-                        child_to_parent_dict[successor_node[0]] = current_node, successor_node[1], cum_cost
-                else:
-                    # if the state is not in the heap
-                    if display == True:
-                        print(successor_node)
-                        print("state: ", successor_node[0], " not in heaplist: " + heap_list.__str__())
-                        print("pushing ", successor_node[0], " with priority: " + str(cum_cost))
-                    frontier.push(successor_node[0], cum_cost)
-                    cum_cost = successor_node[2] + parent_cost
-                    child_to_parent_dict[successor_node[0]] = current_node, successor_node[1], cum_cost
-                print("\n current dict", child_to_parent_dict)
+        #if we already explored the state, skip it
+        if current_state in explored:
+            if display:
+                print(f"Current State: {current_state} has already been explored")
+            continue
 
-    print("UCS Complete======================================================================================\n\n")
+        # add to explored
+        explored.append(current_state)
+
+        parent_state = current_state
+
+        if display:
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            print(f"Current Frontier: {frontier.heap.__str__()}")
+            print(f"Current State is {current_state}")
+
+        counter = 0
+
+        # look through all successor NODES
+        for each_child_node in problem.getSuccessors(parent_state):
+            child_state = each_child_node[0]
+            direction = each_child_node[1]
+            cost_to_child_node_from_parent = each_child_node[2]
+            cumulative_cost_to_child_node = shortest_cost_to_state[parent_state] + cost_to_child_node_from_parent
+
+            if display:
+                counter += 1
+                print("----------------------------------------------------------------------------------------------")
+                print(f"From {parent_state} to {child_state} go via {direction} at a cost of {cumulative_cost_to_child_node}")
+
+
+            child_state = each_child_node[0]
+            direction = each_child_node[1]
+            cost_to_child_node_from_parent = each_child_node[2]
+            cumulative_cost_to_child_node = shortest_cost_to_state[parent_state] + cost_to_child_node_from_parent
+
+            frontier_list = frontier.heap
+            # check if the child is already in frontier
+            if isAlreadyInHeap(frontier_list,child_state):
+
+                if display:
+                    print(f"{child_state} is already in frontier with a cost of {shortest_cost_to_state[child_state]} "
+                          f"and current cost is {cumulative_cost_to_child_node}")
+
+                if hasBetterPrio(frontier_list,child_state,cumulative_cost_to_child_node):
+
+                    if display:
+                        print("UPDATING heap with current cost, and child to parent, and shortest cost to child ")
+                    frontier.update(child_state,cumulative_cost_to_child_node)
+                    # store cost to child node
+                    shortest_cost_to_state[child_state] = cumulative_cost_to_child_node
+                    # store path from parent to child, key:child value:parent
+                    child_to_parent_dict[child_state] = (parent_state, direction)
+
+                    print("----------------------------------------------------------------------------------------------")
+                else:
+                    continue
+
+            else:
+                if display:
+                    print(f"child state: {child_state} not in heap, adding to {child_state} to heap")
+                #if not in frontier than push with cumulative cost
+                frontier.push(child_state,cumulative_cost_to_child_node)
+                #store cost to child node
+                shortest_cost_to_state[child_state] = cumulative_cost_to_child_node
+                #store path from parent to child, key:child value:parent
+                child_to_parent_dict[child_state] = (parent_state, direction)
+
+        if display:
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
+
+
+    if display:
+        print("UCS Complete")
     #print(child_to_parent_dict)
-    return getUCSPath(child_to_parent_dict,current_node, first_state)
+    return getUCSPath(child_to_parent_dict,current_state, first_state)
 
 
 
