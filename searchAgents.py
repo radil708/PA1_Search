@@ -343,9 +343,18 @@ class CornersProblem(search.SearchProblem):
         """
         "*** YOUR CODE HERE ***"
 
+        #set to True to show debug statements
+        display = True
+
         #This finds one corner
         if state in self.corners and state not in self.corners_visited_state:
             self.corners_visited_state.append(state)
+            if display:
+                print("***********************************************************")
+                print(f"Corners visited: {self.corners_visited_state}")
+                print(f"All corners: {self.corners}")
+                print("***********************************************************")
+
             return corners_tuple_equals(self.corners, self.corners_visited_state,len(self.corners))
         return False
 
