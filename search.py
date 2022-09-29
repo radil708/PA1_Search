@@ -461,7 +461,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     '''
 
     # uncomment line below to see tests run one at a time, helpful in conjuction with debug statements
-    # input("hit enter to continue")
+    #input("hit enter to continue to next test")
 
     # set display to True to see debug statements, helpful for seeing step by step
     display = False
@@ -566,27 +566,27 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
                     print(f"{child_state} is already in frontier with a priority of {priority_of_states[child_state]} "
                           f"and current calc priority is {calculated_priority}")
 
-                    if hasBetterPrio(frontier_list, child_state, calculated_priority):
+                if hasBetterPrio(frontier_list, child_state, calculated_priority):
 
-                        if display:
-                            print("UPDATING heap with current cost, and child to parent, and shortest cost to child ")
+                    if display:
+                        print("UPDATING heap with current cost, and child to parent, and shortest cost to child ")
 
-                        frontier.update(child_state, calculated_priority)
-                        # store cost to child node
-                        shortest_cost_to_state[child_state] = cumulative_cost_to_child_node
+                    frontier.update(child_state, calculated_priority)
+                    # store cost to child node
+                    shortest_cost_to_state[child_state] = cumulative_cost_to_child_node
 
-                        #store priority
-                        priority_of_states[child_state] = calculated_priority
+                    #store priority
+                    priority_of_states[child_state] = calculated_priority
 
-                        # store path from parent to child, key:child value:parent
-                        child_to_parent_dict[child_state] = (parent_state, direction)
+                    # store path from parent to child, key:child value:parent
+                    child_to_parent_dict[child_state] = (parent_state, direction)
 
-                        if display:
-                            print(
+                    if display:
+                        print(
                                 "----------------------------------------------------------------------------------------------")
 
-                    else:
-                        continue
+                else:
+                    continue
             else:
                 if display:
                     print(f"child state: {child_state} not in heap, adding {child_state} to heap")
