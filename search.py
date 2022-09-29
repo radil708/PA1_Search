@@ -299,15 +299,16 @@ def getUCSPath(dict_paths: dict, last_node_state, first_node_state):
 
 
 #TODO remove optional arg
-def uniformCostSearch(problem: SearchProblem, display = False):
+def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    input("hit enter to continue")
+
+    #uncomment line below to see tests run one at a time, helpful in conjuction with debug statements
+    #input("hit enter to continue")
 
     #cost of the node will determing priority
 
-    #prioQ only cares about priority and state
-
+    # set display to True to see debug statements, helpful for seeing step by step
     display = False
 
     #but we need to track parents too....
@@ -328,6 +329,9 @@ def uniformCostSearch(problem: SearchProblem, display = False):
 
     #initizalize explored
     explored = []
+
+    if display:
+        print("\nNEW TEST\n")
 
     while not frontier.isEmpty():
         #current node is parent node
@@ -353,7 +357,8 @@ def uniformCostSearch(problem: SearchProblem, display = False):
 
         if display:
             print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-            print(f"Current Frontier: {frontier.heap.__str__()}")
+            f_list = frontier.heap
+            print(f"Current Frontier: {f_list}")
             print(f"Current State is {current_state}")
 
         counter = 0
@@ -364,6 +369,11 @@ def uniformCostSearch(problem: SearchProblem, display = False):
             direction = each_child_node[1]
             cost_to_child_node_from_parent = each_child_node[2]
             cumulative_cost_to_child_node = shortest_cost_to_state[parent_state] + cost_to_child_node_from_parent
+
+            if child_state in explored:
+                if display:
+                    print(f"Child State: {child_state} already in explored, going to next node")
+                continue
 
             if display:
                 counter += 1
@@ -379,7 +389,6 @@ def uniformCostSearch(problem: SearchProblem, display = False):
             frontier_list = frontier.heap
             # check if the child is already in frontier
             if isAlreadyInHeap(frontier_list,child_state):
-
                 if display:
                     print(f"{child_state} is already in frontier with a cost of {shortest_cost_to_state[child_state]} "
                           f"and current cost is {cumulative_cost_to_child_node}")
@@ -388,13 +397,15 @@ def uniformCostSearch(problem: SearchProblem, display = False):
 
                     if display:
                         print("UPDATING heap with current cost, and child to parent, and shortest cost to child ")
+
                     frontier.update(child_state,cumulative_cost_to_child_node)
                     # store cost to child node
                     shortest_cost_to_state[child_state] = cumulative_cost_to_child_node
                     # store path from parent to child, key:child value:parent
                     child_to_parent_dict[child_state] = (parent_state, direction)
 
-                    print("----------------------------------------------------------------------------------------------")
+                    if display:
+                        print("----------------------------------------------------------------------------------------------")
                 else:
                     continue
 
