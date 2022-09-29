@@ -95,9 +95,6 @@ def getActionsFromNodes(last_node : dict) -> list:
         parent_node = parent_node["PARENT"]
 
     store_actions.reverse()
-    #TODO Delete
-    #print(store_actions)
-    print("DFS Complete")
     return store_actions
 
 
@@ -129,15 +126,18 @@ def depthFirstSearch(problem: SearchProblem):
 
     #Copied and modified from figure 3.11 AIMA pg. 82
 
-    ##input: initial_state, successor(), goal_test()
-    stored_node_tuple_tracker = []
+
+    #uncomment to see tests one at a time
+    #input("Hit enter to proceed to next test")
+
+    # set to True to see debug statements
+    display = False
+
+    if display:
+        print("-----INITIATING DEPTH FIRST SEARCH------")
 
     ###Initialize the initial-state node: initial node = (initial_state, [])
-    #node <- a node with STATE = problem.INITIAL-STATE, PATH-COST = 0
-
-    # TODO delete print statements
-    #print("STARTING DFS")
-
+    # node <- a node with STATE = problem.INITIAL-STATE, PATH-COST = 0
     start_node = {}
     start_node["STATE"] = problem.getStartState()
     start_node["COST"] = 0
@@ -154,14 +154,6 @@ def depthFirstSearch(problem: SearchProblem):
     # Initialize the explored set
     explored = set()
 
-
-    # if problem.GOAL-TEST(node.STATE) then return SOLUTION(node)
-    if problem.isGoalState(start_node["STATE"]):
-        # TODO delete print statements
-        #print("DFS REACHED GOAL STATE")
-        # no more directions to return if we achieved goal state
-        return []
-
     # loop do
     while True:
         ##if frontier is empty then return Fail
@@ -171,39 +163,54 @@ def depthFirstSearch(problem: SearchProblem):
     # curr_node = last node in the frontier, remove curr_node from the frontier
         current_node = frontier.pop()
 
+        if display:
+            print("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            print("Current State: {}".format(current_node["STATE"]))
+
         #Add curr_node.state to explored
         # set cannot contain dicts as elements
         explored.add(current_node["STATE"])
 
         if problem.isGoalState(current_node["STATE"]):
-            # TODO delete print statements
-            # print("GOAL STATE REACHED")
+            if display:
+                print("\n!!!! GOAL STATE REACHED, DFS COMPLETE !!!!\n")
             return getActionsFromNodes(current_node)
     #
     # 	for each action in problem.ACTIONS(node.STATE) do
         # so get all potential actions i.e. the next nodes
         all_successors = problem.getSuccessors(current_node["STATE"])
 
+        if display:
+            print("Current Frontier: {}".format(frontier.list.__str__()))
+            print("----------------------------------------------------------------------")
+
+        counter = 0
         for successor_node in all_successors:
+            counter += 1
             # child = CHILD-NODE(problem, node, action), also keep track of parent to return a set of directions
             child = {"STATE": successor_node[0], "ACTION": successor_node[1], "COST": successor_node[2],
                      "PARENT": current_node}
-            #print(child["COST"])
+            if display:
+                print(f"Child# {counter}.) {current_node['STATE']} -> {child['STATE']} at a cost of {child['COST']}")
 
             #if child.STATE is not in explored or frontier then
             # testing they want us to keep track of node only in explored not frontier
             if child not in frontier.list and child["STATE"] not in explored:
-            #if child["STATE"] not in explored:
-                # TODO delete print statements
-                #print("NODE ADDED")
+                if display:
+                    print("Child State NOT yet explored and NOT in frontier, pushing to frontier")
+
             #if problem.GOAL-TEST(child.STATE) then return Solution(child)
                 frontier.push(child)
                 # keep track of path here
                 #print(child,current_node)
+            else:
+                if display:
+                    print(f"Child State {child['STATE']} ALREADY explored, going to next child")
+            if display:
+                print("--------------------------------------------------------------------")
+        if display:
+            print("TRANSITIONING TO NEXT STATE")
 
-
-
-    #util.raiseNotDefined()
 
 #custom function do NOT delete
 def check_queue(queue: list, key: str, expected_val):
@@ -226,14 +233,20 @@ def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
 
+    #uncomment to see tests one at a time, helpful in conjunction with debug statements
+    #input("Hit Enter to proceed to next test")
+
+    #set to True to see debug statements
+    display = False
+
+    if display:
+        print("-----INITIATING BREADTH FIRST SEARCH-----")
+
+
     start_node = {"STATE": problem.getStartState(), "PARENT": None,
                   "ACTION": None, "COST": 0}
     frontier = util.Queue()
     explored = []
-
-    #TODO delete print statements
-    #print("Current frontier list: " + display_curr_frontier_list(frontier.list, "STATE").__str__())
-    #print("Explored: ", explored)
 
     frontier.push(start_node)
 
@@ -241,19 +254,42 @@ def breadthFirstSearch(problem: SearchProblem):
         current_node = frontier.pop()
         explored.append(current_node["STATE"])
 
+        if display:
+            print(f"Current State: {current_node['STATE']}")
+
         if problem.isGoalState(current_node["STATE"]):
+            if display:
+                print("\n!!!! GOAL STATE REACHED, BFS COMPLETE !!!!")
             break
 
+        if display:
+            print(f"Current Frontier: {frontier.list.__str__()}")
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+        counter = 0
+
         for successor_node in problem.getSuccessors(current_node["STATE"]):
+            counter += 1
+
+            child_node = {"STATE": successor_node[0], "ACTION": successor_node[1], "COST": successor_node[2],
+                          "PARENT": current_node}
+            if display:
+                print(f"Child #{counter}.) {child_node['STATE']} via {child_node['ACTION']} at a cost of {child_node['COST']}")
+
             if successor_node[0] not in explored and not check_queue(frontier.list, "STATE",successor_node[0]):
-                #print("Current frontier list: " + display_curr_frontier_list(frontier.list,"STATE").__str__())
-                #print("Explored: ", explored)
-                #print(successor_node[0])
-                child_node = {"STATE": successor_node[0], "ACTION": successor_node[1],"COST": successor_node[2],
-                     "PARENT": current_node}
+                if display:
+                    print(f"Child state: {child_node['STATE']} NOT in EXPLORED or FRONTIER, push to FRONTIER")
                 frontier.push(child_node)
-    #print("BFS Complete")
-    #input("Hit enter to continue")
+            else:
+                if display:
+                    print(f"Child State: {child_node['STATE']} ALREADY Explored, going to next node")
+
+            if display:
+                print("-----------------------------------------------------------------------------")
+
+        if display:
+            print("TRANSITIONING TO NEXT NODE\n")
+
     return getActionsFromNodes(current_node)
 
 

@@ -326,16 +326,18 @@ class CornersProblem(search.SearchProblem):
         # in initializing the problem
         "*** YOUR CODE HERE ***"
 
-        #initialize variable of visited corners to keep track
-        self.corners_visited_state = []
-
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
-        return self.startingPosition
+        # use a compound state
+        # the state will be a list
+        # first element is the actual state
+        # second element is all corner states visited
+        corners_visited = []
+        return (self.startingPosition, corners_visited)
 
     def isGoalState(self, state: Any):
         """
@@ -343,23 +345,23 @@ class CornersProblem(search.SearchProblem):
         """
         "*** YOUR CODE HERE ***"
 
+        #TODO set display to False
         #set to True to show debug statements
         display = True
 
-        #This finds one corner
-        if state in self.corners and state not in self.corners_visited_state:
-            self.corners_visited_state.append(state)
-            if display:
-                print("***********************************************************")
-                print(f"Corners visited: {self.corners_visited_state}")
-                print(f"All corners: {self.corners}")
-                print("***********************************************************")
+        # Actual Current Position State
+        position = state[0]
 
-            return corners_tuple_equals(self.corners, self.corners_visited_state,len(self.corners))
-        return False
+        #list containing corner states visited
+        corners_visited = state[1]
 
-        #TODO delete print and delete return False
-        #return corners_tuple_equals(self.corners, self.corners_visited_state)
+        #TODO delete priont statement
+        if display:
+            reached_goal = corners_tuple_equals(self.corners, corners_visited,len(self.corners))
+            print(f"is Goal State? : {reached_goal}")
+
+        return reached_goal
+
 
 
     def getSuccessors(self, state: Any):
@@ -385,11 +387,15 @@ class CornersProblem(search.SearchProblem):
 
         "*** YOUR CODE HERE ***"
 
+        display = True
+
+        #using compound state i.e. state = (x,y) , [cornersVisitedList]
+
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            x, y = state
-            #TODO delete print statement
+            x, y = state[0]
             dx, dy = Actions.directionToVector(action)
+
             nextx, nexty = int(x + dx), int(y + dy)
             # from pacman.Gamestate docs
             '''
@@ -401,13 +407,28 @@ class CornersProblem(search.SearchProblem):
             '''
             hitsWall = self.walls[nextx][nexty]
 
+            # if a wall is NOT hit
             if hitsWall == False:
-                nextState = (nextx, nexty)
+                position_child_state = (nextx, nexty)
+
+                corners_visited = state[1]
+
+                #TODO logic maybe? wrong here delete and move to heuristic
+                if position_child_state in self.corners and position_child_state not in corners_visited:
+                    # update corners visited
+                    corners_visited.append(position_child_state)
+                    if display:
+                        print(f"Child state {position_child_state} is a corner and not in corners visited {corners_visited}")
+                        print("updating corners visited")
+                        print("------------------------------")
+
+                # I call this compound state because like a compound it holds more than 1 thing
+                compound_state = (position_child_state, corners_visited)
                 #cost must be 1 always for this?
                 cost = 1
                 # successor node is a list that looks like
-                # ((4, 6), 'North', 1)
-                successors.append((nextState,action, cost))
+                # ( ( (4, 6) , [] ), 'North', 1)
+                successors.append((compound_state,action, cost))
 
 
         self._expanded += 1 # DO NOT CHANGE
@@ -428,6 +449,7 @@ class CornersProblem(search.SearchProblem):
         return len(actions)
 
 
+
 def cornersHeuristic(state: Any, problem: CornersProblem):
     """
     A heuristic for the CornersProblem that you defined.
@@ -445,7 +467,29 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+
+    # extract info from compound state
+    current_state = state[0]
+    corners_visited = state[1]
+
+    # If successor state is one of the corners NOT VISITED make heuristic small!
+    # doing this check because state gets added to corners visited at getSuccessors
+    #   not in corners visited but in
+    if current_state in corners_visited:
+        return 0
+    else:
+        corners_not_yet_visited = list(set(corners) - set(corners_visited))
+
+        stored_distances = []
+        # find distances to corners not yet visited and store in list
+
+        for each_unvisited_corner in corners_not_yet_visited:
+            stored_distances.append(util.manhattanDistance(current_state, each_unvisited_corner))
+
+        #heuristic will be sum of distances to remaining corners
+        heuristic = sum(stored_distances)
+
+        return heuristic
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
