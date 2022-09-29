@@ -221,12 +221,22 @@ class PriorityQueueWithFunction(PriorityQueue):
         PriorityQueue.__init__(self)        # super-class initializer
 
     def push(self, item):
+        #TODO remove print statement
+        print("ITEM IS ", item)
+        print("first_item_0 is ", item[0])
+        print("second_item_0 is ", item[1])
+
+        manhattanDistance(item[0], item[1])
+
         "Adds an item to the queue with priority from the priority function"
         PriorityQueue.push(self, item, self.priorityFunction(item))
 
 
 def manhattanDistance( xy1, xy2 ):
     "Returns the Manhattan distance between points xy1 and xy2"
+    #xy must be a tuples -> xy1 = (x1,x2)
+    print("manhattan xy1 = ", xy1)
+    print("manhattan xy2 = ", xy2)
     return abs( xy1[0] - xy2[0] ) + abs( xy1[1] - xy2[1] )
 
 """

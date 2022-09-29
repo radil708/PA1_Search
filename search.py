@@ -221,7 +221,7 @@ def display_curr_frontier_list(list_in : list, key: str):
         new.append(each_dict[key])
     return new
 
-#TODO Move code into function cannot have custom function methods created
+
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
@@ -232,8 +232,8 @@ def breadthFirstSearch(problem: SearchProblem):
     explored = []
 
     #TODO delete print statements
-    print("Current frontier list: " + display_curr_frontier_list(frontier.list, "STATE").__str__())
-    print("Explored: ", explored)
+    #print("Current frontier list: " + display_curr_frontier_list(frontier.list, "STATE").__str__())
+    #print("Explored: ", explored)
 
     frontier.push(start_node)
 
@@ -246,13 +246,13 @@ def breadthFirstSearch(problem: SearchProblem):
 
         for successor_node in problem.getSuccessors(current_node["STATE"]):
             if successor_node[0] not in explored and not check_queue(frontier.list, "STATE",successor_node[0]):
-                print("Current frontier list: " + display_curr_frontier_list(frontier.list,"STATE").__str__())
-                print("Explored: ", explored)
-                print(successor_node[0])
+                #print("Current frontier list: " + display_curr_frontier_list(frontier.list,"STATE").__str__())
+                #print("Explored: ", explored)
+                #print(successor_node[0])
                 child_node = {"STATE": successor_node[0], "ACTION": successor_node[1],"COST": successor_node[2],
                      "PARENT": current_node}
                 frontier.push(child_node)
-    print("BFS Complete")
+    #print("BFS Complete")
     #input("Hit enter to continue")
     return getActionsFromNodes(current_node)
 
@@ -442,6 +442,64 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+
+    '''
+    A* search calculates priority by adding some heuristic to actual path cost
+    so if... 
+            p(n) = path cost
+            h(n) = heuristic cost
+            f(n) = g(n) + h(n) 
+            where f(n) is priority
+    
+    # what heuristic can we use? Maybe euclidian? maybe manhattan distance?
+    #not allowed to import math method so maybe get diff, between x and y? (this is manhattan distance)
+    # ie. |x2 - x1| + |y2 - y1| -> this will be our heuristic function
+    
+    NOTE: manhattan distance function already defined in util
+    '''
+
+    # uncomment line below to see tests run one at a time, helpful in conjuction with debug statements
+    # input("hit enter to continue")
+
+    # set display to True to see debug statements, helpful for seeing step by step
+    display = False
+
+    # Keep track of parent child links
+    child_to_parent_dict = {}
+    # key is child node and value is (parent, action)
+    child_to_parent_dict[problem.getStartState()] = (None, None)
+
+    first_state = problem.getStartState()
+    # initialize start node with state, cost
+
+    # keep track of costs to get to a state
+    shortest_cost_to_state = {problem.getStartState(): 0}
+
+    # initialize prio queue using manhattanDistance as function
+    frontier = util.PriorityQueue()
+
+    #if using manhattan distance item passed must be a list of tuples?
+    # (xy1, xy2) where
+    # xy1 = (x1,x2) and xy2 = (y1, y2)
+    # so item must be ( (x1,x2), (y1, y2) )
+
+    #cannot just put one tuple because missing second tuple so can't (0,0)
+    #cannot just put two items because excess arguments (0,0), (0,0)
+    start_node = (first_state, None, (0, heuristic(first_state, problem)))
+    print(start_node)
+
+    frontier.push([start_node], start_node[2])
+    exit(0)
+    # initizalize explored
+    explored = []
+
+    if display:
+        print("\nNEW TEST\n")
+
+
+
+
+
     util.raiseNotDefined()
 
 
