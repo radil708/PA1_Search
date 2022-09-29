@@ -549,7 +549,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
 
             #update heuristic cost tracker
             heuristic_cost_to_state[child_state] = heuristic_cost_of_child_state
-            #determine priority
+            #determine priority -> f(n) = g(n) + h(n)
             calculated_priority = cumulative_cost_to_child_node + heuristic_cost_of_child_state
 
             if display:
@@ -566,10 +566,11 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
                     print(f"{child_state} is already in frontier with a priority of {priority_of_states[child_state]} "
                           f"and current calc priority is {calculated_priority}")
 
+                # if the child has a better priority i.e. shorter path found to child state
                 if hasBetterPrio(frontier_list, child_state, calculated_priority):
 
                     if display:
-                        print("UPDATING heap with current cost, and child to parent, and shortest cost to child ")
+                        print("UPDATING heap with current priority, and child to parent, and shortest cost to child ")
 
                     frontier.update(child_state, calculated_priority)
                     # store cost to child node
@@ -590,7 +591,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
             else:
                 if display:
                     print(f"child state: {child_state} not in heap, adding {child_state} to heap")
-                #if not in frontier than push with cumulative cost
+                #if not in frontier then push with cumulative cost
                 frontier.push(child_state,calculated_priority)
                 #store cost to child node
                 shortest_cost_to_state[child_state] = cumulative_cost_to_child_node
@@ -604,7 +605,7 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
 
     if display:
         print("A* Complete")
-    #print(child_to_parent_dict)
+
     return getUCSPath(child_to_parent_dict,current_state, start_state)
 
 

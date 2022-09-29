@@ -270,6 +270,37 @@ def euclideanHeuristic(position, problem, info={}):
 # This portion is incomplete.  Time to write code!  #
 #####################################################
 
+
+#Custom helper function for corners to determine if current state matches goal state
+
+def corners_tuple_equals(goal_tupple: tuple, current_tupple: list, t_limit: int) -> bool:
+    '''
+    This method is used to compare the goal state to a current state
+    @param goal_tupple: a tuple containing all corners visited
+    @param current_tupple: a list containing the current corners visited
+    @param t_limit: an int that is length of the goal_tupple
+    @return: bool, true if all unique elements in current_tuple are present in
+            goal tupple
+    '''
+
+    unique_goal_t = set(goal_tupple)
+    unique_current_t = set(current_tupple)
+
+    if len(unique_goal_t) != len(unique_current_t):
+        return False
+
+    counter = 0
+
+    unique_goal_t = set(goal_tupple)
+    unique_current_t = set(current_tupple)
+
+    #elements must be unique
+    for each_element in unique_current_t:
+        if each_element in unique_goal_t:
+            counter +=1
+
+    return t_limit == counter
+
 class CornersProblem(search.SearchProblem):
     """
     This search problem finds paths through all four corners of a layout.
@@ -282,8 +313,10 @@ class CornersProblem(search.SearchProblem):
         Stores the walls, pacman's starting position and corners.
         """
         self.walls = startingGameState.getWalls()
+        #this attribute contains the starting state
         self.startingPosition = startingGameState.getPacmanPosition()
         top, right = self.walls.height-2, self.walls.width-2
+        # so this looks like a list of tuples with corner states
         self.corners = ((1,1), (1,top), (right, 1), (right, top))
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
@@ -293,20 +326,32 @@ class CornersProblem(search.SearchProblem):
         # in initializing the problem
         "*** YOUR CODE HERE ***"
 
+        #initialize variable of visited corners to keep track
+        self.corners_visited_state = []
+
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.startingPosition
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        #This finds one corner
+        if state in self.corners and state not in self.corners_visited_state:
+            self.corners_visited_state.append(state)
+            return corners_tuple_equals(self.corners, self.corners_visited_state,len(self.corners))
+        return False
+
+        #TODO delete print and delete return False
+        #return corners_tuple_equals(self.corners, self.corners_visited_state)
+
 
     def getSuccessors(self, state: Any):
         """
@@ -319,8 +364,9 @@ class CornersProblem(search.SearchProblem):
             is the incremental cost of expanding to that successor
         """
 
-        successors = []
-        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+        #code snippet for example
+        #successors = [] # list of sucessors
+        #for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
             #   x,y = currentPosition
@@ -328,9 +374,35 @@ class CornersProblem(search.SearchProblem):
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
 
-            "*** YOUR CODE HERE ***"
+        "*** YOUR CODE HERE ***"
+
+        successors = []
+        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+            x, y = state
+            #TODO delete print statement
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            # from pacman.Gamestate docs
+            '''
+            Grids can be accessed via list notation, so to check 
+            if there is a wall at (x,y), just call
+            walls = state.getWalls()
+            if walls[x][y] == True: ...
+            then a wall is hit
+            '''
+            hitsWall = self.walls[nextx][nexty]
+
+            if hitsWall == False:
+                nextState = (nextx, nexty)
+                #cost must be 1 always for this?
+                cost = 1
+                # successor node is a list that looks like
+                # ((4, 6), 'North', 1)
+                successors.append((nextState,action, cost))
+
 
         self._expanded += 1 # DO NOT CHANGE
+
         return successors
 
     def getCostOfActions(self, actions):
