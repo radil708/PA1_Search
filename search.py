@@ -366,25 +366,20 @@ def uniformCostSearch(problem: SearchProblem):
         # look through all successor NODES
         for each_child_node in problem.getSuccessors(parent_state):
             child_state = each_child_node[0]
-            direction = each_child_node[1]
-            cost_to_child_node_from_parent = each_child_node[2]
-            cumulative_cost_to_child_node = shortest_cost_to_state[parent_state] + cost_to_child_node_from_parent
 
             if child_state in explored:
                 if display:
                     print(f"Child State: {child_state} already in explored, going to next node")
                 continue
 
+            direction = each_child_node[1]
+            cost_to_child_node_from_parent = each_child_node[2]
+            cumulative_cost_to_child_node = shortest_cost_to_state[parent_state] + cost_to_child_node_from_parent
+
             if display:
                 counter += 1
                 print("----------------------------------------------------------------------------------------------")
                 print(f"From {parent_state} to {child_state} go via {direction} at a cost of {cumulative_cost_to_child_node}")
-
-
-            child_state = each_child_node[0]
-            direction = each_child_node[1]
-            cost_to_child_node_from_parent = each_child_node[2]
-            cumulative_cost_to_child_node = shortest_cost_to_state[parent_state] + cost_to_child_node_from_parent
 
             frontier_list = frontier.heap
             # check if the child is already in frontier
@@ -442,65 +437,175 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    '''
+    IMPORTANT:
+     - A* takes a heuristic function as an argument.
+     - combines UCS and Greedy so keep track of cumulative path cost
+     - Heuristics take two arguments: a state in the search problem 
+        (the main argument), and the problem itself (for reference information)
+     - The nullHeuristic heuristic function in search.py is a trivial example. 
+    '''
 
     '''
-    A* search calculates priority by adding some heuristic to actual path cost
-    so if... 
-            p(n) = path cost
-            h(n) = heuristic cost
-            f(n) = g(n) + h(n) 
-            where f(n) is priority
+    priority of state is f(n)
+    f(n) = g(n) + h(n)
+    WHERE
+        g(n) = cumulative path cost
+        h(n) = heuristic cost
     
-    # what heuristic can we use? Maybe euclidian? maybe manhattan distance?
-    #not allowed to import math method so maybe get diff, between x and y? (this is manhattan distance)
-    # ie. |x2 - x1| + |y2 - y1| -> this will be our heuristic function
-    
-    NOTE: manhattan distance function already defined in util
+    '''
+
+    '''
+    need to use default heuristic somewhere?
+    Heuristic functions already written, just use them
     '''
 
     # uncomment line below to see tests run one at a time, helpful in conjuction with debug statements
     # input("hit enter to continue")
 
     # set display to True to see debug statements, helpful for seeing step by step
-    display = False
+    display = True
 
     # Keep track of parent child links
     child_to_parent_dict = {}
+
+    start_state = problem.getStartState()
+
     # key is child node and value is (parent, action)
-    child_to_parent_dict[problem.getStartState()] = (None, None)
+    child_to_parent_dict[start_state] = (None, None)
 
-    first_state = problem.getStartState()
-    # initialize start node with state, cost
+    # keep track of costs to get to a state i.e. g(n)
+    shortest_cost_to_state = {start_state: 0}
+    # keep track of heuristic cost to state i.e. h(n)
+    heuristic_cost_to_state = {start_state: heuristic(start_state, problem)}
 
-    # keep track of costs to get to a state
-    shortest_cost_to_state = {problem.getStartState(): 0}
+    calculated_priority = shortest_cost_to_state[start_state] +\
+                          heuristic_cost_to_state[start_state]
 
-    # initialize prio queue using manhattanDistance as function
+    #keep track of f(n)
+    priority_of_states = {start_state: calculated_priority}
+
+    # initialize prio queue
     frontier = util.PriorityQueue()
 
-    #if using manhattan distance item passed must be a list of tuples?
-    # (xy1, xy2) where
-    # xy1 = (x1,x2) and xy2 = (y1, y2)
-    # so item must be ( (x1,x2), (y1, y2) )
+    #heuristic takes a state as first param and problem as second
+    #third element is (path cost, heuristic cost)
 
-    #cannot just put one tuple because missing second tuple so can't (0,0)
-    #cannot just put two items because excess arguments (0,0), (0,0)
-    start_node = (first_state, None, (0, heuristic(first_state, problem)))
-    print(start_node)
+    frontier.push(start_state, calculated_priority)
+    # heap shows (priority, count, state)
 
-    frontier.push([start_node], start_node[2])
-    exit(0)
     # initizalize explored
     explored = []
 
     if display:
         print("\nNEW TEST\n")
 
+    while not frontier.isEmpty():
+        #current node is parent node
+        #this only returns the item or "state" not anything else
+        current_state = frontier.pop()
 
+        #reached goal!
+        if problem.isGoalState(current_state):
+            if display:
+                print("Goal state has been reached")
+            break
 
+        #if we already explored the state, skip it
+        if current_state in explored:
+            if display:
+                print(f"Current State: {current_state} has already been explored")
+            continue
 
+        # add to explored
+        explored.append(current_state)
 
-    util.raiseNotDefined()
+        parent_state = current_state
+
+        if display:
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            f_list = frontier.heap
+            print(f"Current Frontier: {f_list}")
+            print(f"Current State is {current_state}")
+
+        counter = 0
+
+        # look through all successor NODES
+        for each_child_node in problem.getSuccessors(parent_state):
+            child_state = each_child_node[0]
+
+            if child_state in explored:
+                if display:
+                    print(f"Child State: {child_state} already in explored, going to next node")
+                    print("-----------------------------------------------------------------------")
+                continue
+
+            direction = each_child_node[1]
+            cost_to_child_node_from_parent = each_child_node[2]
+            # g(n) -> cumulative path cost
+            cumulative_cost_to_child_node = shortest_cost_to_state[parent_state] + cost_to_child_node_from_parent
+            # h(n) -> heuristic cost only
+            heuristic_cost_of_child_state = heuristic(child_state, problem)
+
+            #update heuristic cost tracker
+            heuristic_cost_to_state[child_state] = heuristic_cost_of_child_state
+            #determine priority
+            calculated_priority = cumulative_cost_to_child_node + heuristic_cost_of_child_state
+
+            if display:
+                counter += 1
+                print("----------------------------------------------------------------------------------------------")
+                print(f"From {parent_state} to {child_state} go via {direction} at a cost of {cumulative_cost_to_child_node}")
+                print(f"hueristic cost = {heuristic_cost_of_child_state}")
+                print(f"Priority Value = {cumulative_cost_to_child_node} + {heuristic_cost_of_child_state} = {calculated_priority}")
+
+            frontier_list = frontier.heap
+            # check if the child is already in frontier
+            if isAlreadyInHeap(frontier_list, child_state):
+                if display:
+                    print(f"{child_state} is already in frontier with a priority of {priority_of_states[child_state]} "
+                          f"and current calc priority is {calculated_priority}")
+
+                    if hasBetterPrio(frontier_list, child_state, calculated_priority):
+
+                        if display:
+                            print("UPDATING heap with current cost, and child to parent, and shortest cost to child ")
+
+                        frontier.update(child_state, calculated_priority)
+                        # store cost to child node
+                        shortest_cost_to_state[child_state] = cumulative_cost_to_child_node
+
+                        #store priority
+                        priority_of_states[child_state] = calculated_priority
+
+                        # store path from parent to child, key:child value:parent
+                        child_to_parent_dict[child_state] = (parent_state, direction)
+
+                        if display:
+                            print(
+                                "----------------------------------------------------------------------------------------------")
+
+                    else:
+                        continue
+            else:
+                if display:
+                    print(f"child state: {child_state} not in heap, adding {child_state} to heap")
+                #if not in frontier than push with cumulative cost
+                frontier.push(child_state,calculated_priority)
+                #store cost to child node
+                shortest_cost_to_state[child_state] = cumulative_cost_to_child_node
+                # store priority
+                priority_of_states[child_state] = calculated_priority
+                #store path from parent to child, key:child value:parent
+                child_to_parent_dict[child_state] = (parent_state, direction)
+
+        if display:
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n")
+
+    if display:
+        print("A* Complete")
+    #print(child_to_parent_dict)
+    return getUCSPath(child_to_parent_dict,current_state, start_state)
 
 
 # Abbreviations
