@@ -466,25 +466,42 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     # extract info from compound state
     current_state = state[0]
     corners_visited = state[1]
+    heuristic_cost = 0
 
-    # If successor state is one of the corners NOT VISITED make heuristic small!
-    # doing this check because state gets added to corners visited at getSuccessors
-    #   not in corners visited but in
-    if current_state in corners_visited:
-        return 0
-    else:
-        corners_not_yet_visited = list(set(corners) - set(corners_visited))
 
-        stored_distances = []
-        # find distances to corners not yet visited and store in list
+    # get all remaining unvisited corners
+    corners_not_yet_visited = list(set(corners) - set(corners_visited))
 
-        for each_unvisited_corner in corners_not_yet_visited:
-            stored_distances.append(util.manhattanDistance(current_state, each_unvisited_corner))
+    # if only one corner left to go
+    if len(corners_not_yet_visited) == 1:
+        heuristic_cost = util.manhattanDistance(current_state,corners_not_yet_visited[0])
+        return heuristic_cost
 
-        #heuristic will be sum of distances to remaining corners
-        heuristic = min(stored_distances)
+    # if multiple corners left
+    # heuristic will be based on distance from current state to closest corner, and
+    # from closest corner to next closet corner etc...
 
-        return heuristic
+    while len(corners_not_yet_visited) > 0:
+        #initialize a corner variable
+        some_corner = corners_not_yet_visited[0]
+        distance_to_some_corner = util.manhattanDistance(current_state, some_corner)
+
+        # find distance to closest corner from current state
+        for corners_left in corners_not_yet_visited[1:]:
+            distance_to_another_corner = util.manhattanDistance(current_state, corners_left)
+            if distance_to_another_corner < distance_to_some_corner:
+                some_corner = corners_left
+                distance_to_some_corner = distance_to_another_corner
+
+        closest_corner_to_current_state = some_corner
+        distance_to_closest_corner_from_current_state = distance_to_some_corner
+
+        heuristic_cost += distance_to_closest_corner_from_current_state
+        corners_not_yet_visited.remove(closest_corner_to_current_state)
+        current_state = closest_corner_to_current_state
+
+    return heuristic_cost
+
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
