@@ -482,7 +482,7 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
             stored_distances.append(util.manhattanDistance(current_state, each_unvisited_corner))
 
         #heuristic will be sum of distances to remaining corners
-        heuristic = sum(stored_distances)
+        heuristic = min(stored_distances)
 
         return heuristic
 
