@@ -636,7 +636,12 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
 
     #get distance between pacman and closest food
     distance_to_closest_food_from_pacman = mazeDistance(pac_man_pos, closest_food_pellet, problem.startingGameState)
-    #Nodes expanded for tricky test is 7,491
+
+    '''
+    if line 623, 631 and 638 use maze distance, for tricky: 12,372 nodes expanded
+    if line 623 and 631 use maze distance and 638 use util.manhattanDistance, for tricky: 12,801 nodes expanded
+    if line 623 and 631 use util.manhattanDistance and 638 use mazeDistance, for tricky: 7,491 nodes expanded
+    '''
     return distance_to_closest_food_from_pacman
 
 class ClosestDotSearchAgent(SearchAgent):
