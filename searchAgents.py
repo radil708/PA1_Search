@@ -673,8 +673,9 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # I want to use a decent search algo, prompt recommends A*
+        # UCS is a special case of A* if we treat every node to have heuristic cost = 0
+        return search.uniformCostSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -708,9 +709,16 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
-
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        #Goal is to get to closest food pellet. So then the state just has to be
+        #   one of the positions of the food in the list
+        all_food_pos_list = self.food.asList()
+
+        if state in all_food_pos_list:
+            return True
+        return False
+
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
     """

@@ -333,8 +333,6 @@ def getUCSPath(dict_paths: dict, last_node_state, first_node_state):
     path.reverse()
     return path
 
-
-#TODO remove optional arg
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"

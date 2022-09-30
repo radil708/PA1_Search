@@ -1,0 +1,7 @@
+This repo contains my solutions to the pacman project 1 search as listed in: https://inst.eecs.berkeley.edu/~cs188/sp22/project1/#question-7-4-points-eating-all-the-dots
+
+In it, I implemented the following search algorithms DFS, BFS, UCS, and A*
+
+I also designed some heuristics for problems as listed in the prompt
+
+Refer to the link for prompt questions
