@@ -529,6 +529,11 @@ class FoodSearchProblem:
         return self.start
 
     def isGoalState(self, state):
+        # looks like the state is list of lists like in corners
+        # Why looking at length? # length of second element must be 0 to reach goal?
+        # so this keeps track of all food available in second element
+        # each time pacman eat food this list of available food should decrease
+        # when no food left, list is empty and goal is reached
         return state[1].count() == 0
 
     def getSuccessors(self, state):
@@ -536,11 +541,13 @@ class FoodSearchProblem:
         successors = []
         self._expanded += 1 # DO NOT CHANGE
         for direction in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            x,y = state[0]
+            x,y = state[0] # state of parent
             dx, dy = Actions.directionToVector(direction)
-            nextx, nexty = int(x + dx), int(y + dy)
+            nextx, nexty = int(x + dx), int(y + dy) # state of child
             if not self.walls[nextx][nexty]:
                 nextFood = state[1].copy()
+                # nextFood is a 2D array of booleans, position = True there is food
+                # setting to false means Pacman will eat the food so no food at position
                 nextFood[nextx][nexty] = False
                 successors.append( ( ((nextx, nexty), nextFood), direction, 1) )
         return successors
@@ -595,6 +602,51 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+
+    #Use the inbuilt mazeDistance method
+    '''
+    A simple potential heuristic to use is the maze distance from pacman to the closest food source 
+    '''
+
+    pac_man_pos = position
+
+    # get food grid as list
+    flattened_food_grid = foodGrid.asList() # so list of positions (x,y) but only present if food value = True
+                                            # so places without food are not counter in list
+    heuristic_cost = 0
+
+    if len(flattened_food_grid) == 0:
+        return heuristic_cost
+
+    #get distance from pacman to closest food source
+    while len(flattened_food_grid) > 0:
+        #initialize a corner variable
+        some_food_pos = flattened_food_grid[0]
+        distance_to_some_food = mazeDistance(pac_man_pos, some_food_pos,problem.startingGameState)
+
+        # find distance to closest corner from current state
+        for food_left in flattened_food_grid[1:]:
+            distance_to_another_food_pellet = mazeDistance(pac_man_pos, food_left, problem.startingGameState)
+            if distance_to_another_food_pellet < distance_to_some_food:
+                some_food_pos = food_left
+                distance_to_some_food = distance_to_another_food_pellet
+
+        closest_food_pos = some_food_pos
+        distance_to_closest_food_from_current_state = distance_to_some_food
+
+        heuristic_cost += distance_to_closest_food_from_current_state
+        flattened_food_grid.remove(closest_food_pos)
+        pac_man_pos = closest_food_pos
+
+    return heuristic_cost
+
+
+
+
+
+
+
+
     return 0
 
 class ClosestDotSearchAgent(SearchAgent):
