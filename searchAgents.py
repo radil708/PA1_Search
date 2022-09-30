@@ -608,6 +608,7 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     A simple potential heuristic to use is the maze distance from pacman to the closest food source 
     '''
 
+
     pac_man_pos = position
 
     # get food grid as list
@@ -618,34 +619,25 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     if len(flattened_food_grid) == 0:
         return heuristic_cost
 
+    closest_food_pellet = flattened_food_grid[0]
+    closest_food_distance = util.manhattanDistance(pac_man_pos, closest_food_pellet)
+
+    list_of_food_pellets_left = flattened_food_grid[1:]
+
     #get distance from pacman to closest food source
-    while len(flattened_food_grid) > 0:
+    while len(list_of_food_pellets_left) > 0:
         #initialize a corner variable
-        some_food_pos = flattened_food_grid[0]
-        distance_to_some_food = mazeDistance(pac_man_pos, some_food_pos,problem.startingGameState)
+        current_food = list_of_food_pellets_left.pop()
+        distance_to_current_food = util.manhattanDistance(pac_man_pos, current_food)
+        if distance_to_current_food < closest_food_distance:
+            closest_food_pellet = current_food
+            closest_food_distance = distance_to_current_food
 
-        # find distance to closest corner from current state
-        for food_left in flattened_food_grid[1:]:
-            distance_to_another_food_pellet = mazeDistance(pac_man_pos, food_left, problem.startingGameState)
-            if distance_to_another_food_pellet < distance_to_some_food:
-                some_food_pos = food_left
-                distance_to_some_food = distance_to_another_food_pellet
-
-    closest_food_pos = some_food_pos
 
     #get distance between pacman and closest food
-    distance_to_closest_food_from_pacman = mazeDistance(pac_man_pos, closest_food_pos,problem.startingGameState)
-
+    distance_to_closest_food_from_pacman = mazeDistance(pac_man_pos, closest_food_pellet, problem.startingGameState)
+    #Nodes expanded for tricky test is 7,491
     return distance_to_closest_food_from_pacman
-
-
-
-
-
-
-
-
-    return 0
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
