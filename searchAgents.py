@@ -613,18 +613,19 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
 
     # get food grid as list
     flattened_food_grid = foodGrid.asList() # so list of positions (x,y) but only present if food value = True
-                                            # so places without food are not counter in list
+                                            # so places without food are not present in this list
     heuristic_cost = 0
 
     if len(flattened_food_grid) == 0:
         return heuristic_cost
 
+    #initialize closest food variable, along with closest manhattan distance variable
     closest_food_pellet = flattened_food_grid[0]
     closest_food_distance = util.manhattanDistance(pac_man_pos, closest_food_pellet)
 
     list_of_food_pellets_left = flattened_food_grid[1:]
 
-    #get distance from pacman to closest food source
+    #get manhattan distance from pacman to closest food source
     while len(list_of_food_pellets_left) > 0:
         #initialize a corner variable
         current_food = list_of_food_pellets_left.pop()
@@ -634,7 +635,7 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
             closest_food_distance = distance_to_current_food
 
 
-    #get distance between pacman and closest food
+    #get ACTUAL distance between pacman and closest food
     distance_to_closest_food_from_pacman = mazeDistance(pac_man_pos, closest_food_pellet, problem.startingGameState)
 
     '''
