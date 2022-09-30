@@ -631,14 +631,12 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
                 some_food_pos = food_left
                 distance_to_some_food = distance_to_another_food_pellet
 
-        closest_food_pos = some_food_pos
-        distance_to_closest_food_from_current_state = distance_to_some_food
+    closest_food_pos = some_food_pos
 
-        heuristic_cost += distance_to_closest_food_from_current_state
-        flattened_food_grid.remove(closest_food_pos)
-        pac_man_pos = closest_food_pos
+    #get distance between pacman and closest food
+    distance_to_closest_food_from_pacman = mazeDistance(pac_man_pos, closest_food_pos,problem.startingGameState)
 
-    return heuristic_cost
+    return distance_to_closest_food_from_pacman
 
 
 
