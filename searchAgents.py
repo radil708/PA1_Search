@@ -496,8 +496,11 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
         closest_corner_to_current_state = some_corner
         distance_to_closest_corner_from_current_state = distance_to_some_corner
 
+        #update heuristic cost
         heuristic_cost += distance_to_closest_corner_from_current_state
+        # remove the corner from the corners yet visited
         corners_not_yet_visited.remove(closest_corner_to_current_state)
+        # current state is now the position of closest corner
         current_state = closest_corner_to_current_state
 
     return heuristic_cost
@@ -636,12 +639,13 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
 
 
     #get ACTUAL distance between pacman and closest food
-    distance_to_closest_food_from_pacman = mazeDistance(pac_man_pos, closest_food_pellet, problem.startingGameState)
+    distance_to_closest_food_from_pacman = mazeDistance(pac_man_pos, closest_food_pellet,problem.startingGameState)
 
     '''
-    if line 623, 631 and 638 use maze distance, for tricky: 12,372 nodes expanded
-    if line 623 and 631 use maze distance and 638 use util.manhattanDistance, for tricky: 12,801 nodes expanded
-    if line 623 and 631 use util.manhattanDistance and 638 use mazeDistance, for tricky: 7,491 nodes expanded
+    if line 627, 635 and 642 use util.manhattanDistance, for tricky: 13,898 nodes expanded
+    if line 627, 635 and 642 use maze distance, for tricky: 12,372 nodes expanded
+    if line 627 and 635 use maze distance and 642 use util.manhattanDistance, for tricky: 12,801 nodes expanded
+    if line 627 and 635 use util.manhattanDistance and 642 use mazeDistance, for tricky: 7,491 nodes expanded
     '''
     return distance_to_closest_food_from_pacman
 
