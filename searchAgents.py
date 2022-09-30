@@ -678,8 +678,9 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         # I want to use a decent search algo, prompt recommends A*
-        # UCS is a special case of A* if we treat every node to have heuristic cost = 0
-        return search.uniformCostSearch(problem)
+        # since default heuristic is null this essentially makes it act like UCS
+        # Also tested with other algo's: succeeds with BFS, fails with DFS, succeeds with UCS
+        return search.aStarSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
